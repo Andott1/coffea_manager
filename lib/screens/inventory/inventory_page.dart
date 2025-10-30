@@ -28,7 +28,7 @@ class InventoryPage extends StatelessWidget {
                       child: Container(
                         width:
                             MediaQuery.of(context).size.width *
-                            0.9, // 80% of screen width
+                            0.9, 
                         height: 35,
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
@@ -46,7 +46,7 @@ class InventoryPage extends StatelessWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: TextField(
-                                readOnly: true, // prevent typing directly here
+                                readOnly: true, 
                                 onTap: () {
                                   Navigator.push(
                                     context,

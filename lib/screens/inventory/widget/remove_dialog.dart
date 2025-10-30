@@ -17,7 +17,7 @@ class RemoveDialog {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 🧾 Title
+                // Title
                 Text(
                   "Remove Item",
                   style: GoogleFonts.poppins(
@@ -28,7 +28,7 @@ class RemoveDialog {
                 ),
                 const SizedBox(height: 15),
 
-                // 📦 Item name
+                // Item name
                 Text(
                   'Are you sure you want to remove:',
                   style: GoogleFonts.poppins(fontSize: 14),
@@ -45,7 +45,7 @@ class RemoveDialog {
                 ),
                 const SizedBox(height: 20),
 
-                // ✅ Buttons
+                // Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

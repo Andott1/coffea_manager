@@ -54,7 +54,7 @@ class TimeDateContentState extends State<TimeDateContent> {
         child: Row(
           children: [
 
-            // TIME (Left side)
+            // TIME
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
@@ -83,7 +83,7 @@ class TimeDateContentState extends State<TimeDateContent> {
 
             const SizedBox(width: 15),
 
-            // DATE (Right side)
+            // DATE
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

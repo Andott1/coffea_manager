@@ -22,7 +22,7 @@ class _StockSearchPageState extends State<StockSearchPage> {
     allItems = List<Map<String, dynamic>>.from(testInventoryItems);
   }
 
-  /// 🔎 When user types, filter matching items by name or category
+
   void _onSearchChanged(String query) {
     setState(() {
       if (query.isEmpty) {
@@ -43,7 +43,7 @@ class _StockSearchPageState extends State<StockSearchPage> {
     });
   }
 
-  /// ✨ Highlight matching text in orange
+  // Highlight matching text in orange
   Widget _buildHighlightedText(String text, String query) {
     final matchIndex = text.toLowerCase().indexOf(query.toLowerCase());
 
@@ -77,8 +77,6 @@ class _StockSearchPageState extends State<StockSearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      /// 🔹 Search Bar AppBar
       appBar: AppBar(
         titleSpacing: 0,
         automaticallyImplyLeading: false,
@@ -134,15 +132,13 @@ class _StockSearchPageState extends State<StockSearchPage> {
           ],
         ),
       ),
-
-      /// 🔹 Search Results or Recent
       body: _controller.text.isEmpty
           ? _buildRecentSearches()
           : _buildSearchResults(),
     );
   }
 
-  /// 🕓 Shows list of recent searches
+
   Widget _buildRecentSearches() {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
@@ -180,7 +176,7 @@ class _StockSearchPageState extends State<StockSearchPage> {
     );
   }
 
-  /// 📋 Displays filtered product suggestions
+
   Widget _buildSearchResults() {
     if (filteredItems.isEmpty) {
       return Center(
@@ -206,7 +202,6 @@ class _StockSearchPageState extends State<StockSearchPage> {
             style: GoogleFonts.poppins(color: Colors.grey, fontSize: 13),
           ),
           onTap: () {
-            // Save to recent
             setState(() {
               recentSearches.remove(item['item_name']);
               recentSearches.insert(0, item['item_name']);
@@ -215,14 +210,13 @@ class _StockSearchPageState extends State<StockSearchPage> {
               }
             });
 
-            // Navigate to the StocksPage of the selected category
+ 
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => StocksPage(
                   category: item['item_category'],
                   highlightItem: item['item_name'],
-                   // highlight the item there
                 ),
               ),
             );

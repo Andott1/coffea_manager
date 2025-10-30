@@ -83,7 +83,7 @@ class _StocksPageState extends State<StocksPage> {
         filteredStocks.sort(
           (a, b) =>
               (b['item_quantity'] ?? 0).compareTo(a['item_quantity'] ?? 0),
-        ); // 👈 DESCENDING sort
+        ); 
       } 
       else if (currentSort == "Low Stock First") {
         filteredStocks.sort((a, b) {

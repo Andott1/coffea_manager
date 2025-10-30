@@ -56,7 +56,7 @@ class AddStockDialog {
                     ),
                     const SizedBox(width: 20),
 
-                    // 🧾 Product Info
+                    // Product Info
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

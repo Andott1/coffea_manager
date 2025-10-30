@@ -61,9 +61,8 @@ class _SummaryContentState extends State<SummaryContent> {
                   color: Colors.black87,
                 ),
               ),
+              
               const SizedBox(height: 15),
-
-              // mapped data
               Column(
                 children: categories.entries.map((entry) {
                   return Padding(
