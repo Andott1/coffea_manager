@@ -6,9 +6,9 @@ plugins {
 }
 
 android {
-    namespace = "com.example.phone_site"
+    namespace = "com.example.coffea_companion"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.phone_site"
+        applicationId = "com.example.coffea_companion"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -31,11 +31,28 @@ android {
     }
 
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+        getByName("release") {
+            // ✅ Kotlin syntax for signing config
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+
+    // ✅ Auto-Rename APK Logic (Kotlin DSL)
+    applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                val appName = "Coffea_Companion"
+                val versionName = variant.versionName
+                val versionCode = variant.versionCode
+                
+                // Construct the new name
+                val newName = "${appName}_v${versionName}_build${versionCode}.apk"
+                
+                // Set the output filename
+                output.outputFileName = newName
+            }
     }
 }
 
