@@ -90,7 +90,7 @@ class IngredientUsageModel extends HiveObject {
 
   // ──────────────── UTILITY GETTERS ────────────────
   double get totalUsage =>
-      quantities.values.fold(0.0, (sum, val) => sum + (val ?? 0));
+      quantities.values.fold(0.0, (sum, val) => sum + (val));
 
   bool get isEmpty =>
       quantities.values.every((v) => v == 0 || v.isNaN || v.isInfinite);

@@ -16,7 +16,6 @@ class DialogUtils {
     Color accentColor = ThemeConfig.secondaryGreen,
   }) {
     final overlay = Overlay.of(context);
-    if (overlay == null) return;
 
     // Remove oldest immediately if exceeding limit
     if (_activeSnackbars.length >= _maxSnackbars) {
@@ -86,8 +85,8 @@ class _CoffeaSnackbar extends StatefulWidget {
     required this.icon,
     required this.accentColor,
     required this.bottomOffset,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<_CoffeaSnackbar> createState() => _CoffeaSnackbarState();

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../config/theme_config.dart';
-import '../../config/font_config.dart';
 
 class NumericPad extends StatelessWidget {
   final Function(String) onInput;

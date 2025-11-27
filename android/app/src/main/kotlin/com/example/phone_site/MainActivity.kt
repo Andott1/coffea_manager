@@ -1,4 +1,4 @@
-package com.example.phone_site
+package com.example.coffea_manager
 
 import io.flutter.embedding.android.FlutterActivity
 
