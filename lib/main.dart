@@ -17,9 +17,20 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LoggerService.info("📱 Mobile App Starting...");
 
+  // 1. Retrieve keys from the environment
+  // We use a fallback (empty string) just to prevent a crash if you forget the flag,
+  // but Supabase will fail to initialize if they are empty.
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  const supabaseKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  // 2. check if keys are present (Optional safety check)
+  if (supabaseUrl.isEmpty || supabaseKey.isEmpty) {
+    LoggerService.error('❌ Supabase credentials missing! Run with --dart-define');
+  }
+
   await Supabase.initialize(
-    url: 'https://vvbjuezcwyakrnkrmgon.supabase.co', 
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2Ymp1ZXpjd3lha3Jua3JtZ29uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMzI1ODUsImV4cCI6MjA3ODYwODU4NX0.MBloBPZdwfjit4N5heAxdWwRMOGHF3mPHsTkk-zZkWM', 
+    url: supabaseUrl, 
+    anonKey: supabaseKey, 
   );
   
   await HiveService.init();
