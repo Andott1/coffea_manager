@@ -1,46 +1,65 @@
 # ☕ Coffea Manager (Mobile)
 
-**Coffea Manager** is the companion mobile application for the Coffea Suite ecosystem. It acts as an **Offline-First Admin Dashboard**, allowing store managers and owners to oversee operations, manage inventory, verify staff attendance, and process payroll directly from their smartphone.
+![Flutter](https://img.shields.io/badge/Flutter-3.32%2B-blue?logo=flutter)
+![Dart](https://img.shields.io/badge/Dart-3.8%2B-blue?logo=dart)
+![Hive](https://img.shields.io/badge/Hive-Local%20Storage-yellow)
+![Supabase](https://img.shields.io/badge/Supabase-Cloud%20Sync-green)
+![bcrypt](https://img.shields.io/badge/bcrypt-1.1.3-lightgrey)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Version-1.1.0-brightgreen)
+
+**Coffea Manager** is the official mobile companion app for the **Coffea Suite ecosystem**.
+It provides store owners and managers with an **offline-capable, real-time admin dashboard**—supporting inventory management, payroll processing, attendance verification, and transaction monitoring directly from a smartphone.
+
+This app links seamlessly with the **Tablet POS** system, sharing the same backend (Supabase) and the same offline-first architecture (Hive).
 
 ---
 
-## 🚀 Key Features
+## 🚀 Core Features
 
 ### 📊 **1. Operational Dashboard**
 
-* **Real-Time Metrics:** View today's total revenue, order count, and active staff at a glance.
-* **Quick Actions:** Shortcuts for receiving stock, verifying staff, and manual sync.
-* **Activity Feed:** A unified timeline showing recent sales, inventory movements, and staff clock-ins.
+* **Live Metrics:** Today's revenue, total transactions, and active staff indicators.
+* **Quick Action Tiles:** Receive stock, approve attendance, force sync, and more.
+* **Activity Timeline:** Chronological feed of sales, stock changes, payroll actions, and attendance events.
 
 ### 📦 **2. Inventory Management**
 
-* **Smart Unit Conversion:** Automatically converts between purchasing units (e.g., `kg`, `L`) and base usage units (e.g., `g`, `mL`).
-* **Adjustment Logs:** Log wastage, restocks, or corrections.
-* **Audit History:** View a searchable history of who moved stock and why.
+* **Real-Time Stock Levels:** Automatically synced with POS product sales and recipe deductions.
+* **Smart Unit Conversions:** Handle purchases in bulk (kg/L) and usage in finer units (g/mL).
+* **Inventory Movements:** Record Restock, Wastage, Corrections, and Transfers.
+* **Searchable Stock History:** See exactly who changed what and when.
 
-### 👥 **3. Staff & HR Hub**
+### 👥 **3. Staff & Attendance**
 
-* **"Waterfall" Dashboard:** See who is currently On Floor, On Break, or Finished for the day.
-* **Attendance Verification:** Review photo proofs for clock-ins. Verify or reject entries with specific reasons.
-* **Payroll System:**
-  * Generate payroll drafts for specific date ranges based on verified logs.
-  * Apply adjustments (Bonuses/Deductions).
-  * **Locking Mechanism:** Marking payroll as "Paid" locks the associated attendance logs to prevent double-payment.
+* **Staff "Waterfall" View:** Shows live staff status (On Floor → Break → Done).
+* **Photo-Verified Attendance:** Review captured images from tablet clock-ins.
+* **Verification Workflow:** Approve, reject, or request changes with reasons.
+* **Payroll Automation:**
 
-### 🧾 **4. Order History**
+  * Generate payroll for any date range.
+  * Auto-compute gross pay from verified logs.
+  * Add bonuses/deductions.
+  * Lock payroll to prevent double payments.
 
-* View transaction history with status filtering (Paid/Voided) and sorting.
-* Detailed breakdown of items, variants, and cashiers.
+### 🧾 **4. Orders & History**
+
+* Browse transaction logs synced from the POS.
+* Filter by Paid, Voided, Discounted, or Refunded.
+* Full breakdown of items, modifiers, and staff involved.
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
-* **Framework:** Flutter (Dart)
-* **State Management:** BLoC (Authentication, Connectivity) & local `setState` for UI widgets.
-* **Local Database:** [Hive](https://docs.hivedb.dev/) (NoSQL) for offline persistence.
-* **Cloud Backend:** [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage).
-* **Sync Strategy:** Queue-based optimistic UI with `SupabaseSyncService`.
+| Component            | Technology                      | Purpose                             |
+| -------------------- | ------------------------------- | ----------------------------------- |
+| **Framework**        | Flutter (Dart 3.8)              | Cross-platform UI                   |
+| **Local Storage**    | Hive / Hive Flutter             | Offline-first caching               |
+| **Cloud Backend**    | Supabase (PostgreSQL + Storage) | Secure syncing & authentication     |
+| **Security**         | bcrypt                          | PIN/password hashing                |
+| **State Management** | BLoC + Local setState           | Scalable and predictable state flow |
+| **Logging**          | Talker                          | Global error and event tracing      |
 
 ---
 
@@ -48,45 +67,60 @@
 
 ```text
 lib/
-├── config/               # Theme, Fonts, and UI Constants
+├── config/               # Themes, Typography, App Colors
 ├── core/
-│   ├── bloc/             # Global State (Auth, Connectivity)
-│   ├── models/           # Hive Adapters (User, Product, Ingredient, Logs, etc.)
-│   ├── services/         # Business Logic (Sync, Logger, Session, Hive)
-│   ├── utils/            # Formatters, Dialogs, Responsive Logic
-│   └── widgets/          # Reusable UI (Avatar, NumericPad)
+│   ├── bloc/             # Auth, Connectivity, Sync
+│   ├── models/           # Hive Adapters (User, Logs, Stock, Payroll)
+│   ├── services/         # Sync, Hive, Logging, Session Service
+│   ├── utils/            # Formatters, Dialogs, Responsive helpers
+│   └── widgets/          # Reusable UI components (Cards, Lists, Inputs)
 ├── screens/
-│   ├── attendance/       # Staff Dashboard, Verification, Payroll
-│   ├── dashboard/        # Home Revenue & Activity Feed
-│   ├── inventory/        # Stock Levels & History
-│   ├── orders/           # Transaction History
-│   └── startup/          # Login, Cloud Restore, & Splash
+│   ├── attendance/       # Verification, Staff Status, Payroll
+│   ├── dashboard/        # Metrics, Timeline, Quick Actions
+│   ├── inventory/        # Stock Levels, Movements, Adjustments
+│   ├── orders/           # Transaction Logs
+│   └── startup/          # Login, Splash, Cloud Restore
 └── main.dart             # App Entry Point
-````
+```
 
 ---
 
-##### 🔄 Sync Architecture
+## 🔄 Sync Architecture (Offline-First)
 
-The app uses an **Offline-First** approach.
+Coffea Manager uses the same **queue-based syncing model** as the tablet POS.
 
-1. **Reads:** Data is always read from the local **Hive** boxes for instant UI rendering.
-2. **Writes:** Changes are written to Hive immediately, then added to a `SyncQueueModel`.
-3. **Sync:** `SupabaseSyncService` watches connection status. When online, it processes the queue:
-      * **UPSERT:** Full object updates (Ingredients, Payroll).
-      * **UPDATE:** Optimized partial updates (Verification Status).
-      * **Uploads:** Attendance images are uploaded to Supabase Storage before the log entry is synced.
+1. **Local Writes:**
+   All changes (attendance actions, stock adjustments, payroll updates) are written to **Hive** instantly.
+
+2. **SyncQueueModel:**
+   Every mutation is logged in an offline queue.
+
+3. **Background Synchronization:**
+   `SupabaseSyncService` listens for connectivity restored and pushes pending sync items.
+
+4. **Optimized Updates:**
+
+   * Full upserts for large data (Ingredients, Users, Payroll)
+   * Partial updates for verifications, timestamps
+   * Attendance images are uploaded to Supabase Storage before syncing logs
+
+5. **Manual Sync Controls:**
+   Trigger **Force Push**, **Force Pull**, and **Conflict Resolution** from the Settings page.
 
 ---
 
-## ⚙️ Setup & Installation
+## ⚙️ Installation & Setup
 
-### Prerequisites
+### 🔧 Prerequisites
 
-* Flutter SDK (Latest Stable)
-* Dart SDK
+* Flutter SDK **3.32+**
+* Dart SDK **3.8+**
+* Supabase project (URL + Anon Key)
+* Android/iOS smartphone
 
-### 1\. Clone & Install
+---
+
+### 🚀 1. Clone & Install
 
 ```bash
 git clone <repo_url>
@@ -94,33 +128,30 @@ cd Coffea_phone
 flutter pub get
 ```
 
-### 2\. Hive Code Generation
-
-If you modify any Models, you must regenerate the TypeAdapters:
+### 🧩 2. Generate Hive TypeAdapters
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-### 3\. Running the App
+### ▶️ 3. Run the App
 
 ```bash
-flutter run --dart-define=SUPABASE_URL=[SUPABASE URL] --dart-define=SUPABASE_ANON_KEY=[SUPABASE ANON KEY]
+flutter run --dart-define=SUPABASE_URL=[YOUR_URL] --dart-define=SUPABASE_ANON_KEY=[YOUR_ANON_KEY]
 ```
-
-### ⚠️ Windows Build Note
-
-If you encounter a `compileDebugUnitTestSources` error regarding different drive roots (e.g., Project on `E:` and Cache on `C:`), please move the project to the `C:` drive or update your `PUB_CACHE` environment variable.
 
 ---
 
 ## 📱 Supported Devices
 
-The UI is built with a custom `Responsive` utility that scales fonts and padding based on the screen diagonal, optimized for:
+The UI is optimized for:
 
-* Standard Smartphones (Android/iOS)
-* Small Tablets.
+* iOS smartphones (primary target)
+* Android smartphones
 
 ---
 
-© 2025 Coffea Suite. All Rights Reserved.
+## 📝 License
+
+Licensed under the **MIT License**.
+See the `LICENSE` file for details.
