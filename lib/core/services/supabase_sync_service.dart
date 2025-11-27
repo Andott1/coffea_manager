@@ -46,6 +46,9 @@ class SupabaseSyncService {
     required String action,
     required Map<String, dynamic> data,
   }) async {
+    // Debug log to confirm queue entry
+    LoggerService.info("📝 Queuing $action for $table (${data['id']})");
+
     final item = SyncQueueModel(
       id: const Uuid().v4(),
       table: table,
@@ -54,6 +57,7 @@ class SupabaseSyncService {
       timestamp: DateTime.now(),
     );
     await _queueBox?.add(item);
+    
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), processQueue);
   }
@@ -69,26 +73,34 @@ class SupabaseSyncService {
       final allPending = _queueBox!.values.toList();
       if (allPending.isEmpty) return;
 
+      LoggerService.info("🔄 Processing ${allPending.length} pending items...");
+
       final byTable = groupBy(allPending, (SyncQueueModel item) => item.table);
 
       for (final table in byTable.keys) {
         final tableItems = byTable[table]!;
 
+        // 1. Handle File Uploads first (for attendance proofs)
         if (table == 'attendance_logs') {
            await _handleFileUploads(tableItems);
         }
         
         final Map<String, Map<String, dynamic>> uniqueUpserts = {};
         final Set<String> uniqueDeletes = {};
+        final List<SyncQueueModel> updates = []; // ✅ Separate list for Partial Updates
 
         for (var item in tableItems) {
           final id = item.data['id'];
           if (id == null) continue;
 
-          if (item.action == 'UPSERT' || item.action == 'UPDATE') {
+          if (item.action == 'UPSERT') {
             uniqueUpserts[id] = item.data;
             uniqueDeletes.remove(id);
           } 
+          else if (item.action == 'UPDATE') {
+             // ✅ Handle Partial Updates separately
+             updates.add(item);
+          }
           else if (item.action == 'DELETE') {
             uniqueDeletes.add(id);
             uniqueUpserts.remove(id);
@@ -99,23 +111,47 @@ class SupabaseSyncService {
         final deletes = uniqueDeletes.toList();
 
         try {
+          int successCount = 0;
+
+          // A. Execute UPSERTS (Batch)
           if (upserts.isNotEmpty) {
             await _client.from(table).upsert(upserts);
+            successCount += upserts.length;
           }
+
+          // B. Execute UPDATES (One by One)
+          // Necessary because partial updates fail in 'upsert' if required columns are missing
+          if (updates.isNotEmpty) {
+            for (var updateItem in updates) {
+               final id = updateItem.data['id'];
+               // Remove 'id' from payload if using .eq() to be safe, though usually ignored
+               final payload = Map<String, dynamic>.from(updateItem.data)..remove('id');
+               
+               await _client.from(table).update(payload).eq('id', id);
+               successCount++;
+            }
+          }
+
+          // C. Execute DELETES (Batch)
           if (deletes.isNotEmpty) {
             await _client.from(table).delete().inFilter('id', deletes);
+            successCount += deletes.length;
           }
           
+          // Cleanup Queue
           final keysToDelete = tableItems.map((e) => e.key).toList();
           await _queueBox!.deleteAll(keysToDelete);
-          LoggerService.info("✅ Auto-Push: Synced ${upserts.length} items to $table");
+          
+          if (successCount > 0) {
+            LoggerService.info("✅ Auto-Push: Synced $successCount items to $table");
+          }
 
         } catch (e) {
-          LoggerService.error("❌ Batch Push Failed for '$table': $e");
+          LoggerService.error("❌ Sync Failed for '$table': $e");
         }
       }
     } catch (e) {
-      LoggerService.error("❌ Sync Error: $e");
+      LoggerService.error("❌ Process Queue Error: $e");
     } finally {
       _isSyncing = false;
     }
@@ -144,13 +180,13 @@ class SupabaseSyncService {
   // ---------------------------------------------------------------------------
   // PULL LOGIC (Full Download)
   // ---------------------------------------------------------------------------
+  // ... (Keep existing restoreFromCloud code) ...
   static Future<void> restoreFromCloud() async {
     final connectivity = await Connectivity().checkConnectivity();
     if (connectivity.contains(ConnectivityResult.none)) {
       throw Exception("No internet connection.");
     }
     
-    // Try to push pending changes first so they aren't overwritten
     if (_queueBox != null && _queueBox!.isNotEmpty) {
       await processQueue();
     }
@@ -357,8 +393,6 @@ class SupabaseSyncService {
     }
   }
 
-  // ✅ LEGACY COMPATIBILITY: Mapped to processQueue (Push Pending)
-  // The app now relies on restoreFromCloud() for Pulling.
   static Future<void> forceLocalToCloud() async {
     await processQueue();
   }
