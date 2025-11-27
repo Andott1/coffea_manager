@@ -86,7 +86,7 @@ class _InventoryTabState extends State<InventoryTab> with SingleTickerProviderSt
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -265,7 +265,7 @@ class _InventoryTabState extends State<InventoryTab> with SingleTickerProviderSt
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: isLowStock ? Colors.red.shade50 : ThemeConfig.primaryGreen.withOpacity(0.1),
+                        color: isLowStock ? Colors.red.shade50 : ThemeConfig.primaryGreen.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
@@ -541,8 +541,11 @@ class _InventoryTabState extends State<InventoryTab> with SingleTickerProviderSt
                           double changeInBaseUnits = inputAmount * factor;
 
                           double newQuantity = ingredient.quantity;
-                          if (action == "Restock") newQuantity += changeInBaseUnits;
-                          else newQuantity -= changeInBaseUnits;
+                          if (action == "Restock") {
+                            newQuantity += changeInBaseUnits;
+                          } else {
+                            newQuantity -= changeInBaseUnits;
+                          }
 
                           // 1. Update & Save Local
                           ingredient.quantity = newQuantity;
@@ -703,7 +706,7 @@ class _InventoryTabState extends State<InventoryTab> with SingleTickerProviderSt
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? ThemeConfig.primaryGreen.withOpacity(0.1) : Colors.white,
+          color: isActive ? ThemeConfig.primaryGreen.withValues(alpha: 0.1) : Colors.white,
           border: Border.all(color: isActive ? ThemeConfig.primaryGreen : Colors.grey.shade300),
           borderRadius: BorderRadius.circular(8),
         ),

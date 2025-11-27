@@ -33,7 +33,7 @@ class _OrdersTabState extends State<OrdersTab> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -272,7 +272,7 @@ class _OrdersTabState extends State<OrdersTab> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.2),
+                          color: statusColor.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -414,7 +414,7 @@ class _OrdersTabState extends State<OrdersTab> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? ThemeConfig.primaryGreen.withOpacity(0.1) : Colors.white,
+          color: isActive ? ThemeConfig.primaryGreen.withValues(alpha: 0.1) : Colors.white,
           border: Border.all(color: isActive ? ThemeConfig.primaryGreen : Colors.grey.shade300),
           borderRadius: BorderRadius.circular(8),
         ),

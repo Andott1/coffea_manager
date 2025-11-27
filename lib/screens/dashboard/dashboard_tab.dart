@@ -115,7 +115,7 @@ class _DashboardTabState extends State<DashboardTab> {
                                       return Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                         decoration: BoxDecoration(
-                                          color: ThemeConfig.white.withOpacity(0.2),
+                                          color: ThemeConfig.white.withValues(alpha: 0.2),
                                           borderRadius: BorderRadius.circular(20),
                                           border: Border.all(color: ThemeConfig.white.withValues(alpha: 0.5)),
                                         ),
@@ -154,7 +154,7 @@ class _DashboardTabState extends State<DashboardTab> {
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.3),
+                                      color: Colors.black.withValues(alpha: 0.3),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -339,7 +339,7 @@ class _DashboardTabState extends State<DashboardTab> {
             borderRadius: BorderRadius.circular(16),
             border: isAlert ? Border.all(color: Colors.red.shade100) : Border.all(color: Colors.grey.shade200),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6, offset: const Offset(0, 2))
+              BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 6, offset: const Offset(0, 2))
             ],
           ),
           child: Column(
@@ -348,7 +348,7 @@ class _DashboardTabState extends State<DashboardTab> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isAlert ? Colors.white : color.withOpacity(0.1),
+                  color: isAlert ? Colors.white : color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, size: 18, color: isAlert ? Colors.red : color),
@@ -444,7 +444,7 @@ class _DashboardTabState extends State<DashboardTab> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2))
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2))
         ],
       ),
       child: Column(
@@ -493,7 +493,7 @@ class _DashboardTabState extends State<DashboardTab> {
           leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 16),

@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:hive/hive.dart';
-import 'package:intl/intl.dart'; // Ensure this is added to pubspec if needed, or use basic string formatting
 import '../../core/models/ingredient_model.dart';
 import '../../core/models/inventory_log_model.dart'; // ✅ Import Log Model
 import 'hive_service.dart'; // ✅ Import HiveService for box access
@@ -81,7 +79,6 @@ class BackupService {
     // The listBackups() reads all. When we add one, we should prepend to the FULL list.
     
     // Re-read full list to be safe
-    final fullList = await listBackups(); 
     
     // Merge logic is tricky if we just passed a partial list. 
     // Better architecture: _writeMetadata accepts the full new list.
