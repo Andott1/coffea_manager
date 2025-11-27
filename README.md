@@ -66,7 +66,7 @@ lib/
 
 ---
 
-## 🔄 Sync Architecture
+##### 🔄 Sync Architecture
 
 The app uses an **Offline-First** approach.
 
@@ -105,23 +105,12 @@ dart run build_runner build --delete-conflicting-outputs
 ### 3\. Running the App
 
 ```bash
-flutter run
+flutter run --dart-define=SUPABASE_URL=[SUPABASE URL] --dart-define=SUPABASE_ANON_KEY=[SUPABASE ANON KEY]
 ```
 
 ### ⚠️ Windows Build Note
 
 If you encounter a `compileDebugUnitTestSources` error regarding different drive roots (e.g., Project on `E:` and Cache on `C:`), please move the project to the `C:` drive or update your `PUB_CACHE` environment variable.
-
----
-
-## 🔐 Credentials & Config
-
-The app connects to Supabase using credentials found in `main.dart`.
-
-* **URL:** `https://vvbjuezcwyakrnkrmgon.supabase.co`
-* **Anon Key:** *(See source code)*
-
-> **Note:** For production, these should be moved to `--dart-define` or a `.env` file.
 
 ---
 
