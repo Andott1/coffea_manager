@@ -5,8 +5,6 @@ import 'package:intl/intl.dart';
 import '../../core/models/ingredient_model.dart';
 import '../../core/models/inventory_log_model.dart';
 import '../../core/services/hive_service.dart';
-import '../../core/services/inventory_log_service.dart';
-import '../../core/services/supabase_sync_service.dart'; // ✅ Added Import
 import '../../config/theme_config.dart';
 
 class InventoryTab extends StatefulWidget {
@@ -218,7 +216,7 @@ class _InventoryTabState extends State<InventoryTab> with SingleTickerProviderSt
   }
 
   // ---------------------------------------------------------------------------
-  // 📦 TAB 1: STOCK LEVELS
+  // 📦 TAB 1: STOCK LEVELS (VIEW ONLY)
   // ---------------------------------------------------------------------------
   Widget _buildStockList() {
     return ValueListenableBuilder(
@@ -296,18 +294,7 @@ class _InventoryTabState extends State<InventoryTab> with SingleTickerProviderSt
                       ),
                     ),
                     
-                    // Action
-                    ElevatedButton(
-                      onPressed: () => _showAdjustmentSheet(context, ing),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isLowStock ? Colors.red : ThemeConfig.primaryGreen,
-                        foregroundColor: Colors.white,
-                        shape: const StadiumBorder(),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      child: const Text("Adjust", style: TextStyle(fontSize: 12)),
-                    ),
+                    // ✅ VIEW ONLY: "Adjust" Button Removed
                   ],
                 ),
               ),
@@ -438,192 +425,8 @@ class _InventoryTabState extends State<InventoryTab> with SingleTickerProviderSt
   }
 
   // ---------------------------------------------------------------------------
-  // 🛠 ADJUSTMENT SHEET (With Sync Fix)
-  // ---------------------------------------------------------------------------
-  void _showAdjustmentSheet(BuildContext context, IngredientModel ingredient) {
-    final TextEditingController qtyController = TextEditingController();
-    String action = "Restock"; 
-    
-    // Default to Main Unit (e.g., L)
-    String selectedUnit = ingredient.unit; 
-    bool isUsingBaseUnit = false; 
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-                left: 20,
-                right: 20,
-                top: 20,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Adjust ${ingredient.name}",
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  
-                  // 1. ACTION
-                  Row(
-                    children: [
-                      _buildChoiceChip("Restock", action == "Restock", (val) => setSheetState(() => action = "Restock")),
-                      const SizedBox(width: 10),
-                      _buildChoiceChip("Correction", action == "Correction", (val) => setSheetState(() => action = "Correction")),
-                      const SizedBox(width: 10),
-                      _buildChoiceChip("Waste", action == "Waste", (val) => setSheetState(() => action = "Waste")),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 2. UNIT SELECTOR (Only if different)
-                  if (ingredient.unit != ingredient.baseUnit) ...[
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _buildUnitToggle(
-                              label: ingredient.unit, // Main Unit (e.g. "L")
-                              isSelected: !isUsingBaseUnit,
-                              onTap: () => setSheetState(() {
-                                isUsingBaseUnit = false;
-                                selectedUnit = ingredient.unit;
-                              }),
-                            ),
-                          ),
-                          Expanded(
-                            child: _buildUnitToggle(
-                              label: ingredient.baseUnit, // Base Unit (e.g. "mL")
-                              isSelected: isUsingBaseUnit,
-                              onTap: () => setSheetState(() {
-                                isUsingBaseUnit = true;
-                                selectedUnit = ingredient.baseUnit;
-                              }),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // 3. INPUT
-                  TextField(
-                    controller: qtyController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      labelText: "Quantity to ${action == 'Restock' ? 'Add' : 'Deduct'} ($selectedUnit)",
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.check_circle, color: Colors.green, size: 30),
-                        onPressed: () async {
-                          final inputAmount = double.tryParse(qtyController.text);
-                          if (inputAmount == null || inputAmount <= 0) return;
-
-                          // Convert input to Base Units
-                          double factor = isUsingBaseUnit ? 1.0 : ingredient.conversionFactor;
-                          double changeInBaseUnits = inputAmount * factor;
-
-                          double newQuantity = ingredient.quantity;
-                          if (action == "Restock") {
-                            newQuantity += changeInBaseUnits;
-                          } else {
-                            newQuantity -= changeInBaseUnits;
-                          }
-
-                          // 1. Update & Save Local
-                          ingredient.quantity = newQuantity;
-                          ingredient.updatedAt = DateTime.now();
-                          await ingredient.save(); // Updates Hive
-
-                          // 2. ✅ FIX: SYNC TO SUPABASE (QUEUE)
-                          SupabaseSyncService.addToQueue(
-                            table: 'ingredients',
-                            action: 'UPSERT',
-                            data: ingredient.toJson(),
-                          );
-
-                          // 3. Log the action (also syncs log)
-                          await InventoryLogService.log(
-                            ingredientName: ingredient.name,
-                            action: action,
-                            quantity: inputAmount, 
-                            unit: selectedUnit,
-                            reason: "Mobile Adjustment",
-                          );
-
-                          if (context.mounted) Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    // Show Current Stock in SELECTED Unit
-                    "Current Stock: ${isUsingBaseUnit ? ingredient.quantity.toStringAsFixed(0) : ingredient.displayQuantity.toStringAsFixed(2)} $selectedUnit", 
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            );
-          }
-        );
-      },
-    );
-  }
-
-  // ---------------------------------------------------------------------------
   // 🛠 UI HELPERS
   // ---------------------------------------------------------------------------
-
-  Widget _buildUnitToggle({required String label, required bool isSelected, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: isSelected ? [const BoxShadow(color: Colors.black12, blurRadius: 2)] : null,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.black : Colors.grey.shade600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChoiceChip(String label, bool isSelected, Function(bool) onSelected) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: onSelected,
-      selectedColor: ThemeConfig.primaryGreen,
-      labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
-      showCheckmark: false,
-    );
-  }
 
   void _showLogDetails(InventoryLogModel log) {
     showModalBottomSheet(
