@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../config/theme_config.dart';
+import '../../core/services/supabase_sync_service.dart'; // ✅ Added for sync logic
 
 // Import Tabs
 import 'dashboard/dashboard_tab.dart';
@@ -26,6 +27,35 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     });
   }
 
+  /// ✅ Logic to pull data manually from the AppBar
+  Future<void> _runPullData() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Pulling latest data from cloud..."),
+        duration: Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    try {
+      await SupabaseSyncService.restoreFromCloud();
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(
+             content: Text("✅ Data Synced Successfully"),
+             backgroundColor: ThemeConfig.secondaryGreen,
+             behavior: SnackBarBehavior.floating,
+           )
+         );
+      }
+    } catch (e) {
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text("Sync Error: $e"), backgroundColor: Colors.red)
+         );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // ✅ NEW "OPERATOR" LAYOUT
@@ -46,9 +76,25 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
-        actions: const [
+        actions: [
+          // ✅ NEW: Pull Data Button (Modern Flat Design)
+          // Using a subtle tonal style or simple icon to keep it "flat"
+          IconButton(
+            onPressed: _runPullData,
+            icon: const Icon(Icons.cloud_download_outlined),
+            tooltip: "Pull Data",
+            color: ThemeConfig.primaryGreen,
+            style: IconButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          
+          const SizedBox(width: 8),
+
           // ✅ Clean Status Avatar (Handles Menu & Online Indicator)
-          ProfileAvatarButton(),
+          const ProfileAvatarButton(),
+          
+          const SizedBox(width: 16), // Right padding for balance
         ],
       ),
       body: pages[_currentIndex],
