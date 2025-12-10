@@ -43,7 +43,7 @@ android {
         variant.outputs
             .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
-                val appName = "CoffeaSuite"
+                val appName = "CoffeaManager"
                 val versionName = variant.versionName
                 val versionCode = variant.versionCode
 
